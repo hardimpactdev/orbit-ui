@@ -2,11 +2,11 @@
 
 namespace HardImpact\Orbit\Ui\Http\Controllers;
 
-use HardImpact\Orbit\Http\Integrations\Orbit\Requests\CreateProjectRequest;
-use HardImpact\Orbit\Http\Integrations\Orbit\Requests\DeleteProjectRequest;
 use HardImpact\Orbit\Core\Services\EnvironmentManager;
 use HardImpact\Orbit\Core\Services\OrbitCli\ConfigurationService;
 use HardImpact\Orbit\Core\Services\OrbitCli\Shared\ConnectorService;
+use HardImpact\Orbit\Http\Integrations\Orbit\Requests\CreateProjectRequest;
+use HardImpact\Orbit\Http\Integrations\Orbit\Requests\DeleteProjectRequest;
 use Illuminate\Http\Request;
 
 class ProjectController extends Controller

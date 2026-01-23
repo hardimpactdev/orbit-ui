@@ -157,14 +157,14 @@ $authorName = ask('Author name', $authorGuess);
 $authorEmail = ask('Author email', $gitEmail);
 $usernameVendor = ask('Vendor name', $vendorGuess);
 $packageName = ask('Package name', $packageGuess);
-$packageDescription = ask('Package description', "Web UI for Orbit");
+$packageDescription = ask('Package description', 'Web UI for Orbit');
 
 writeln('------');
 writeln("Author     : {$authorName} ({$authorEmail})");
 writeln("Vendor     : {$usernameVendor}");
 writeln("Package    : {$packageName}");
-writeln("Namespace  : ".title_case($usernameVendor).'\\'.title_case($packageName));
-writeln("Class name : ".title_case($packageName));
+writeln('Namespace  : '.title_case($usernameVendor).'\\'.title_case($packageName));
+writeln('Class name : '.title_case($packageName));
 writeln("Description: {$packageDescription}");
 writeln('------');
 
