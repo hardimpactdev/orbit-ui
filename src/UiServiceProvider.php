@@ -2,9 +2,9 @@
 
 namespace HardImpact\Orbit\Ui;
 
+use HardImpact\Orbit\Ui\Commands\UiCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use HardImpact\Orbit\Ui\Commands\UiCommand;
 
 class UiServiceProvider extends PackageServiceProvider
 {

@@ -2,9 +2,9 @@
 
 namespace HardImpact\Orbit\Ui\Tests;
 
+use HardImpact\Orbit\Ui\UiServiceProvider;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Orchestra\Testbench\TestCase as Orchestra;
-use HardImpact\Orbit\Ui\UiServiceProvider;
 
 class TestCase extends Orchestra
 {
