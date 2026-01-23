@@ -87,7 +87,10 @@ class UiServiceProvider extends ServiceProvider
         Route::middleware('web')
             ->group(__DIR__.'/../routes/web.php');
 
+        // API routes must use withoutMiddleware to prevent web middleware
+        // from being inherited when called from within web routes file
         Route::prefix('api')
+            ->withoutMiddleware(['web', \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class])
             ->middleware('api')
             ->group(__DIR__.'/../routes/api.php');
     }
