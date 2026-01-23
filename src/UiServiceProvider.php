@@ -2,24 +2,114 @@
 
 namespace HardImpact\Orbit\Ui;
 
-use HardImpact\Orbit\Ui\Commands\UiCommand;
-use Spatie\LaravelPackageTools\Package;
-use Spatie\LaravelPackageTools\PackageServiceProvider;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Vite;
+use Illuminate\Support\ServiceProvider;
 
-class UiServiceProvider extends PackageServiceProvider
+class UiServiceProvider extends ServiceProvider
 {
-    public function configurePackage(Package $package): void
+    public function register(): void
     {
-        /*
-         * This class is a Package Service Provider
-         *
-         * More info: https://github.com/spatie/laravel-package-tools
-         */
-        $package
-            ->name('orbit-ui')
-            ->hasConfigFile()
-            ->hasViews()
-            ->hasMigration('create_orbit_ui_table')
-            ->hasCommand(UiCommand::class);
+        // UI package doesn't need to register core services
+        // Those are handled by orbit-core
+    }
+
+    public function boot(): void
+    {
+        // Only register UI features when Inertia is available
+        if ($this->hasInertia()) {
+            $this->configureVite();
+            $this->registerViews();
+            $this->registerMiddleware();
+            $this->registerMcp();
+            $this->registerPublishing();
+        }
+    }
+
+    /**
+     * Check if Inertia is available (web context).
+     */
+    protected function hasInertia(): bool
+    {
+        return class_exists(\Inertia\Inertia::class);
+    }
+
+    protected function registerMiddleware(): void
+    {
+        // Skip middleware registration when router isn't available (e.g., Laravel Zero CLI)
+        if (! $this->app->bound('router')) {
+            return;
+        }
+
+        // Skip if HTTP Kernel isn't available (pure CLI context)
+        $kernelContract = 'Illuminate\Contracts\Http\Kernel';
+        if (! $this->app->bound($kernelContract)) {
+            return;
+        }
+
+        /** @var \Illuminate\Foundation\Http\Kernel $kernel */
+        $kernel = $this->app->make($kernelContract);
+
+        // Register Inertia middleware
+        if (class_exists(\HardImpact\Orbit\Ui\Http\Middleware\HandleInertiaRequests::class)) {
+            $kernel->appendMiddlewareToGroup('web', \HardImpact\Orbit\Ui\Http\Middleware\HandleInertiaRequests::class);
+        }
+
+        // Register alias for route usage
+        if (class_exists(\HardImpact\Orbit\Ui\Http\Middleware\ImplicitEnvironment::class)) {
+            $this->app['router']->aliasMiddleware('implicit.environment', \HardImpact\Orbit\Ui\Http\Middleware\ImplicitEnvironment::class);
+        }
+    }
+
+    protected function configureVite(): void
+    {
+        // Vite facade may not exist in CLI-only contexts
+        if (! class_exists(\Illuminate\Support\Facades\Vite::class)) {
+            return;
+        }
+
+        Vite::useHotFile(__DIR__.'/../public/hot');
+        Vite::useBuildDirectory('vendor/orbit/build');
+    }
+
+    protected function registerViews(): void
+    {
+        $this->loadViewsFrom(__DIR__.'/../resources/views', 'orbit');
+        config(['inertia.root_view' => 'orbit::app']);
+    }
+
+    /**
+     * Register the package's routes.
+     * Called by consuming apps in their RouteServiceProvider or bootstrap.
+     */
+    public static function routes(): void
+    {
+        Route::middleware('web')
+            ->group(__DIR__.'/../routes/web.php');
+
+        Route::prefix('api')
+            ->middleware('api')
+            ->group(__DIR__.'/../routes/api.php');
+    }
+
+    protected function registerPublishing(): void
+    {
+        if ($this->app->runningInConsole()) {
+            $this->publishes([
+                __DIR__.'/../public/build' => public_path('vendor/orbit/build'),
+            ], 'orbit-assets');
+        }
+    }
+
+    /**
+     * Register MCP routes for AI tool integration.
+     * Loads when laravel/mcp is installed and router is available.
+     */
+    protected function registerMcp(): void
+    {
+        // Only load routes if router exists and MCP is available
+        if (class_exists(\Laravel\Mcp\Facades\Mcp::class) && $this->app->bound('router')) {
+            $this->loadRoutesFrom(__DIR__.'/../routes/mcp.php');
+        }
     }
 }
