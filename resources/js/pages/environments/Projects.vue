@@ -108,10 +108,10 @@ const allProjects = computed(() => {
         }
     }
 
-    // Sort alphabetically by name (case-insensitive)
-    return Array.from(siteMap.values()).sort((a, b) =>
-        a.name.toLowerCase().localeCompare(b.name.toLowerCase()),
-    );
+    // Sort alphabetically by name (case-insensitive), filtering out invalid entries
+    return Array.from(siteMap.values())
+        .filter((p) => p.name != null)
+        .sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
 });
 
 // Initialize provisioning composable
