@@ -195,3 +195,27 @@ When making UI changes that you want to see on orbit-web.ccc:
    ```bash
    ls -la ~/projects/orbit-web/public/vendor/orbit/
    ```
+
+## Vite Development Server with Caddy HTTPS Proxy
+
+When running the Vite dev server behind Caddy for HTTPS:
+
+1. **Use VITE_APP_URL** (not APP_URL) in package.json:
+   ```json
+   "dev": "sh -c 'VITE_APP_URL=https://$0 vite'"
+   ```
+
+2. **Why this matters**: craft-ui's vite config reads `VITE_APP_URL` to:
+   - Configure HMR websocket to connect through proxy (`wss://domain.ccc:443`)
+   - Set proper origin for CORS and asset URLs
+   - Write HTTPS URL to hot file instead of `http://0.0.0.0:5173`
+
+3. **Symptoms of incorrect config**:
+   - Browser error: "Mixed Content: page loaded over HTTPS but requested insecure script"
+   - HMR not working (changes don't reflect instantly)
+   - Hot file contains `http://0.0.0.0:5173` instead of `https://domain.ccc`
+
+4. **To verify it's working**:
+   ```bash
+   cat ~/projects/orbit-ui/public/hot  # Should show https://orbit-web.ccc
+   ```
