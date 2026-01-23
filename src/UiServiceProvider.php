@@ -16,22 +16,11 @@ class UiServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // Only register UI features when Inertia is available
-        if ($this->hasInertia()) {
-            $this->configureVite();
-            $this->registerViews();
-            $this->registerMiddleware();
-            $this->registerMcp();
-            $this->registerPublishing();
-        }
-    }
-
-    /**
-     * Check if Inertia is available (web context).
-     */
-    protected function hasInertia(): bool
-    {
-        return class_exists(\Inertia\Inertia::class);
+        $this->configureVite();
+        $this->registerViews();
+        $this->registerMiddleware();
+        $this->registerMcp();
+        $this->registerPublishing();
     }
 
     protected function registerMiddleware(): void
@@ -50,8 +39,8 @@ class UiServiceProvider extends ServiceProvider
         /** @var \Illuminate\Foundation\Http\Kernel $kernel */
         $kernel = $this->app->make($kernelContract);
 
-        // Register Inertia middleware
-        if (class_exists(\HardImpact\Orbit\Ui\Http\Middleware\HandleInertiaRequests::class)) {
+        // Register Inertia middleware (only when Inertia is available)
+        if (class_exists(\Inertia\Middleware::class)) {
             $kernel->appendMiddlewareToGroup('web', \HardImpact\Orbit\Ui\Http\Middleware\HandleInertiaRequests::class);
         }
 
@@ -106,12 +95,11 @@ class UiServiceProvider extends ServiceProvider
 
     /**
      * Register MCP routes for AI tool integration.
-     * Loads when laravel/mcp is installed and router is available.
      */
     protected function registerMcp(): void
     {
-        // Only load routes if router exists and MCP is available
-        if (class_exists(\Laravel\Mcp\Facades\Mcp::class) && $this->app->bound('router')) {
+        // Only load MCP routes when laravel/mcp is available
+        if (class_exists(\Laravel\Mcp\Facades\Mcp::class)) {
             $this->loadRoutesFrom(__DIR__.'/../routes/mcp.php');
         }
     }
