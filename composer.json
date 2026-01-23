@@ -19,13 +19,16 @@
         "php": "^8.4",
         "illuminate/contracts": "^11.0||^12.0",
         "inertiajs/inertia-laravel": "^2.0",
-        "laravel/framework": "^11.0||^12.0",
-        "hardimpactdev/orbit-core": "dev-main"
+        "laravel/mcp": "^0.5.2",
+        "hardimpactdev/orbit-core": "^0.1.0 || dev-main"
     },
     "repositories": [
         {
             "type": "path",
-            "url": "../orbit-core"
+            "url": "../orbit-core",
+            "options": {
+                "symlink": true
+            }
         }
     ],
     "require-dev": {
