@@ -70,7 +70,7 @@ class EnvironmentController extends Controller
 
     public function create(): \Inertia\Response
     {
-        $sshKeys = \HardImpact\Orbit\Models\SshKey::orderBy('is_default', 'desc')->orderBy('name')->get();
+        $sshKeys = \HardImpact\Orbit\Core\Models\SshKey::orderBy('is_default', 'desc')->orderBy('name')->get();
         $availableSshKeys = Setting::getAvailableSshKeys();
         $hasLocalEnvironment = Environment::where('is_local', true)->exists();
 
@@ -371,11 +371,11 @@ class EnvironmentController extends Controller
         $remoteApiUrl = $this->getRemoteApiUrl($environment);
 
         // Import models for additional settings
-        $sshKeys = \HardImpact\Orbit\Models\SshKey::orderBy('is_default', 'desc')->orderBy('name')->get();
-        $availableSshKeys = \HardImpact\Orbit\Models\Setting::getAvailableSshKeys();
-        $templateFavorites = \HardImpact\Orbit\Models\TemplateFavorite::orderByDesc('usage_count')->get();
+        $sshKeys = \HardImpact\Orbit\Core\Models\SshKey::orderBy('is_default', 'desc')->orderBy('name')->get();
+        $availableSshKeys = \HardImpact\Orbit\Core\Models\Setting::getAvailableSshKeys();
+        $templateFavorites = \HardImpact\Orbit\Core\Models\TemplateFavorite::orderByDesc('usage_count')->get();
         $notificationsEnabled = app(\HardImpact\Orbit\Core\Services\NotificationService::class)->isEnabled();
-        $menuBarEnabled = \HardImpact\Orbit\Models\UserPreference::getValue('menu_bar_enabled', false);
+        $menuBarEnabled = \HardImpact\Orbit\Core\Models\UserPreference::getValue('menu_bar_enabled', false);
 
         return \Inertia\Inertia::render('environments/Configuration', [
             'environment' => $environment,
