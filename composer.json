@@ -18,10 +18,16 @@
     "require": {
         "php": "^8.4",
         "illuminate/contracts": "^11.0||^12.0",
-        "inertiajs/inertia-laravel": "^1.3",
+        "inertiajs/inertia-laravel": "^2.0",
         "laravel/framework": "^11.0||^12.0",
         "hardimpactdev/orbit-core": "dev-main"
     },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../orbit-core"
+        }
+    ],
     "require-dev": {
         "laravel/pint": "^1.14",
         "nunomaduro/collision": "^8.8",
