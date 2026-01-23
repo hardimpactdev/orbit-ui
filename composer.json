@@ -20,7 +20,7 @@
         "illuminate/contracts": "^11.0||^12.0",
         "inertiajs/inertia-laravel": "^2.0",
         "laravel/mcp": "^0.5.2",
-        "hardimpactdev/orbit-core": "^0.1.0 || dev-main"
+        "hardimpactdev/orbit-core": "^0.1.0 || @dev"
     },
     "repositories": [
         {
