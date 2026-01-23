@@ -2,6 +2,17 @@
 
 All notable changes to `orbit-ui` will be documented in this file.
 
+## v0.1.1 - Add MCP Server - 2026-01-23
+
+### Changes
+
+- **Added**: MCP server from orbit-core (Tools, Resources, Prompts, OrbitServer)
+- **Updated**: Namespaces to HardImpact\Orbit\Ui\Mcp
+- **Removed**: Obsolete hasInertia() check from boot()
+- **Fixed**: Service provider guards for Inertia and MCP class availability
+
+MCP routes now load when laravel/mcp is available.
+
 ## v0.1.0 - 2026-01-23
 
 First stable release of orbit-ui package
