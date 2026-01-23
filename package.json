@@ -16,7 +16,7 @@
     },
     "scripts": {
         "build": "vue-tsc -b && vite build",
-        "dev": "sh -c 'APP_URL=https://$0 vite'",
+        "dev": "sh -c 'VITE_APP_URL=https://$0 vite'",
         "typecheck": "vue-tsc --noEmit"
     },
     "dependencies": {
