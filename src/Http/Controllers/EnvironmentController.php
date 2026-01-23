@@ -374,7 +374,7 @@ class EnvironmentController extends Controller
         $sshKeys = \HardImpact\Orbit\Models\SshKey::orderBy('is_default', 'desc')->orderBy('name')->get();
         $availableSshKeys = \HardImpact\Orbit\Models\Setting::getAvailableSshKeys();
         $templateFavorites = \HardImpact\Orbit\Models\TemplateFavorite::orderByDesc('usage_count')->get();
-        $notificationsEnabled = app(\HardImpact\Orbit\Services\NotificationService::class)->isEnabled();
+        $notificationsEnabled = app(\HardImpact\Orbit\Core\Services\NotificationService::class)->isEnabled();
         $menuBarEnabled = \HardImpact\Orbit\Models\UserPreference::getValue('menu_bar_enabled', false);
 
         return \Inertia\Inertia::render('environments/Configuration', [
@@ -1127,7 +1127,7 @@ class EnvironmentController extends Controller
         ];
 
         if ($envContent !== null) {
-            $envParser = app(\HardImpact\Orbit\Services\TemplateAnalyzer\EnvParser::class);
+            $envParser = app(\HardImpact\Orbit\Core\Services\TemplateAnalyzer\EnvParser::class);
             $envVars = $envParser->parse($envContent);
 
             $drivers = [
