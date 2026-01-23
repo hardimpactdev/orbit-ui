@@ -63,12 +63,12 @@ const props = defineProps<{
     remoteApiUrl: string | null; // Direct API URL for remote environments (bypasses NativePHP)
 }>();
 
-// Helper to get the API URL - uses remote API directly when available, falls back to NativePHP
+// Helper to get the API URL - uses remote API directly when available, falls back to local API
 const getApiUrl = (path: string) => {
     if (props.remoteApiUrl) {
         return `${props.remoteApiUrl}${path}`;
     }
-    return `/api/environments/${props.environment.id}${path}`;
+    return `/api${path}`;
 };
 
 const page = usePage();
