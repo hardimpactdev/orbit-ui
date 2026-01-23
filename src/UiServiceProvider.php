@@ -1,12 +1,12 @@
 <?php
 
-namespace VendorName\Skeleton;
+namespace HardImpact\Orbit\Ui;
 
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use VendorName\Skeleton\Commands\SkeletonCommand;
+use HardImpact\Orbit\Ui\Commands\UiCommand;
 
-class SkeletonServiceProvider extends PackageServiceProvider
+class UiServiceProvider extends PackageServiceProvider
 {
     public function configurePackage(Package $package): void
     {
@@ -16,10 +16,10 @@ class SkeletonServiceProvider extends PackageServiceProvider
          * More info: https://github.com/spatie/laravel-package-tools
          */
         $package
-            ->name('skeleton')
+            ->name('orbit-ui')
             ->hasConfigFile()
             ->hasViews()
-            ->hasMigration('create_migration_table_name_table')
-            ->hasCommand(SkeletonCommand::class);
+            ->hasMigration('create_orbit_ui_table')
+            ->hasCommand(UiCommand::class);
     }
 }

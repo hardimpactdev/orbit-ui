@@ -1,17 +1,17 @@
 {
-    "name": ":vendor_slug/:package_slug",
-    "description": ":package_description",
+    "name": "hardimpactdev/orbit-ui",
+    "description": "Web UI for Orbit",
     "keywords": [
-        ":vendor_name",
+        "hardimpactdev",
         "laravel",
-        ":package_slug"
+        "orbit-ui"
     ],
-    "homepage": "https://github.com/:vendor_slug/:package_slug",
+    "homepage": "https://github.com/hardimpactdev/orbit-ui",
     "license": "MIT",
     "authors": [
         {
-            "name": ":author_name",
-            "email": "author@domain.com",
+            "name": "Nick Ratel",
+            "email": "nick@hardimpact.dev",
             "role": "Developer"
         }
     ],
@@ -35,13 +35,13 @@
     },
     "autoload": {
         "psr-4": {
-            "VendorName\\Skeleton\\": "src/",
-            "VendorName\\Skeleton\\Database\\Factories\\": "database/factories/"
+            "HardImpact\\Orbit\\Ui\\": "src/",
+            "HardImpact\\Orbit\\Ui\\Database\\Factories\\": "database/factories/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "VendorName\\Skeleton\\Tests\\": "tests/",
+            "HardImpact\\Orbit\\Ui\\Tests\\": "tests/",
             "Workbench\\App\\": "workbench/app/"
         }
     },
@@ -63,10 +63,10 @@
     "extra": {
         "laravel": {
             "providers": [
-                "VendorName\\Skeleton\\SkeletonServiceProvider"
+                "HardImpact\\Orbit\\Ui\\UiServiceProvider"
             ],
             "aliases": {
-                "Skeleton": "VendorName\\Skeleton\\Facades\\Skeleton"
+                "Ui": "HardImpact\\Orbit\\Ui\\Facades\\Ui"
             }
         }
     },

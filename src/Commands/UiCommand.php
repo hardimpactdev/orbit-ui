@@ -1,12 +1,12 @@
 <?php
 
-namespace VendorName\Skeleton\Commands;
+namespace HardImpact\Orbit\Ui\Commands;
 
 use Illuminate\Console\Command;
 
-class SkeletonCommand extends Command
+class UiCommand extends Command
 {
-    public $signature = 'skeleton';
+    public $signature = 'orbit-ui';
 
     public $description = 'My command';
 
