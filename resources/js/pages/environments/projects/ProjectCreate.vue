@@ -207,7 +207,7 @@ async function checkRepoExists(org: string, name: string) {
     const repo = `${org}/${slug}`;
 
     try {
-        const response = await fetch(`/environments/${props.environment.id}/github-repo-exists`, {
+        const response = await fetch('/github-repo-exists', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -260,7 +260,7 @@ const fetchTemplateDefaults = async (template: string) => {
     defaultsError.value = null;
 
     try {
-        const response = await fetch(`/environments/${props.environment.id}/template-defaults`, {
+        const response = await fetch('/template-defaults', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -319,8 +319,8 @@ onMounted(async () => {
 
     try {
         const [userResult, orgsResult] = await Promise.all([
-            fetch(`/environments/${props.environment.id}/github-user`).then((r) => r.json()),
-            fetch(`/environments/${props.environment.id}/github-orgs`).then((r) => r.json()),
+            fetch('/github-user').then((r) => r.json()),
+            fetch('/github-orgs').then((r) => r.json()),
         ]);
 
         if (userResult.success && userResult.user) {
@@ -353,9 +353,7 @@ onMounted(async () => {
         console.error('Failed to fetch GitHub data:', e);
         // Fallback: try to get just the user
         try {
-            const userResult = await fetch(
-                `/environments/${props.environment.id}/github-user`,
-            ).then((r) => r.json());
+            const userResult = await fetch('/github-user').then((r) => r.json());
             if (userResult.success && userResult.user) {
                 githubUser.value = userResult.user.toLowerCase();
                 selectedOrg.value = githubUser.value;
@@ -848,7 +846,7 @@ const submit = () => {
             <!-- Submit Buttons -->
             <div class="flex justify-end gap-3 pt-6 mt-6 border-t border-zinc-800">
                 <Button as-child variant="ghost">
-                    <Link :href="`/environments/${environment.id}/projects`">
+                    <Link href="/projects">
                         Cancel
                     </Link>
                 </Button>
