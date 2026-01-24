@@ -2,6 +2,10 @@
 
 All notable changes to `orbit-ui` will be documented in this file.
 
+## v0.1.2 - 2026-01-24
+
+- fix: use implicit environment routes for project create API calls
+
 ## v0.1.1 - Add MCP Server - 2026-01-23
 
 ### Changes
