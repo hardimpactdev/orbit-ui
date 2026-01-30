@@ -142,7 +142,33 @@ When implementing settings or multi-section pages with vertical tabs:
 The package supports two modes via `config("orbit.multi_environment")`:
 
 - **Web mode** (`false`): Single implicit environment, flat routes
-- **Desktop mode** (`true`): Multiple environments, prefixed routes
+- **Desktop mode** (`true`): Multiple environments, environment management
+
+## Routing Architecture
+
+All environment-scoped routes use flat URLs with `implicit.environment` middleware:
+
+```php
+// Always flat routes for environment operations
+Route::middleware('implicit.environment')->group(function () {
+    Route::get('/', ...);                    // Dashboard
+    Route::get('/projects', ...);            // Projects list
+    Route::get('/projects/create', ...);     // Create project
+    Route::get('/workspaces', ...);          // Workspaces
+    Route::get('/configuration', ...);       // Settings
+});
+```
+
+**Desktop-only routes** for environment CRUD (not scoped to active environment):
+```php
+Route::get('/environments', ...);                              // List all
+Route::post('/environments/{id}/switch', ...);                 // Switch active
+Route::post('/environments/{id}/test-connection', ...);        // Test specific
+Route::get('/environments/{id}/edit', ...);                    // Edit specific
+Route::delete('/environments/{id}', ...);                      // Delete specific
+```
+
+**Important**: Never use `/environments/{id}/projects` or similar. The active environment is tracked via singleton.
 
 ## WebSocket (Echo/Reverb)
 

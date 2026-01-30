@@ -4,10 +4,14 @@ namespace HardImpact\Orbit\Ui\Http\Controllers;
 
 use HardImpact\Orbit\Core\Http\Integrations\Orbit\Requests\CreateProjectRequest;
 use HardImpact\Orbit\Core\Http\Integrations\Orbit\Requests\DeleteProjectRequest;
+use HardImpact\Orbit\Core\Jobs\CreateProjectJob;
+use HardImpact\Orbit\Core\Models\Project;
+use HardImpact\Orbit\Core\Models\TemplateFavorite;
 use HardImpact\Orbit\Core\Services\EnvironmentManager;
 use HardImpact\Orbit\Core\Services\OrbitCli\ConfigurationService;
 use HardImpact\Orbit\Core\Services\OrbitCli\Shared\ConnectorService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class ProjectController extends Controller
 {
@@ -19,7 +23,8 @@ class ProjectController extends Controller
 
     /**
      * Create a new project in the active environment.
-     * Always uses the Saloon API connector for consistency.
+     * For local environments, creates project directly and dispatches job.
+     * For remote environments, uses Saloon API connector.
      */
     public function store(Request $request)
     {
@@ -39,17 +44,114 @@ class ProjectController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'org' => 'nullable|string|max:255',
-            'template' => 'nullable|string|max:255',
+            'template' => 'nullable|string|max:500',
             'is_template' => 'boolean',
             'fork' => 'boolean',
             'visibility' => 'nullable|string|in:private,public',
-            'php_version' => 'nullable|string',
-            'db_driver' => 'nullable|string',
-            'session_driver' => 'nullable|string',
-            'cache_driver' => 'nullable|string',
-            'queue_driver' => 'nullable|string',
+            'php_version' => 'nullable|string|in:8.3,8.4,8.5',
+            'db_driver' => 'nullable|string|in:sqlite,pgsql',
+            'session_driver' => 'nullable|string|in:file,database,redis',
+            'cache_driver' => 'nullable|string|in:file,database,redis',
+            'queue_driver' => 'nullable|string|in:sync,database,redis',
         ]);
 
+        // For local environments, handle directly without HTTP hop
+        if ($environment->is_local) {
+            return $this->storeLocal($request, $environment, $validated);
+        }
+
+        // For remote environments, use the API connector
+        return $this->storeRemote($request, $environment, $validated);
+    }
+
+    /**
+     * Create project directly for local environment (no HTTP hop).
+     */
+    protected function storeLocal(Request $request, $environment, array $validated)
+    {
+        $isTemplate = ! empty($validated['is_template']);
+        $providedRepo = $validated['template'] ?? null;
+        $isImportScenario = ! empty($providedRepo) && ! $isTemplate;
+
+        // Save template as favorite if provided
+        if (! empty($validated['template'])) {
+            $template = TemplateFavorite::firstOrCreate(
+                ['repo_url' => $validated['template']],
+                ['display_name' => $this->extractTemplateName($validated['template'])]
+            );
+            $template->recordUsage([
+                'db_driver' => $validated['db_driver'] ?? null,
+                'session_driver' => $validated['session_driver'] ?? null,
+                'cache_driver' => $validated['cache_driver'] ?? null,
+                'queue_driver' => $validated['queue_driver'] ?? null,
+            ]);
+        }
+
+        // Build options for the job
+        $projectOptions = [
+            'name' => $validated['name'],
+            'org' => $validated['org'] ?? null,
+            'template' => $validated['template'] ?? null,
+            'is_template' => $validated['is_template'] ?? false,
+            'fork' => $isImportScenario ? ($validated['fork'] ?? false) : false,
+            'visibility' => $validated['visibility'] ?? 'private',
+            'php_version' => $validated['php_version'] ?? null,
+            'db_driver' => $validated['db_driver'] ?? null,
+            'session_driver' => $validated['session_driver'] ?? null,
+            'cache_driver' => $validated['cache_driver'] ?? null,
+            'queue_driver' => $validated['queue_driver'] ?? null,
+        ];
+
+        $projectSlug = Str::slug($validated['name']);
+        $config = $this->config->getConfig($environment);
+        $paths = $config['success'] ? ($config['data']['paths'] ?? []) : [];
+        $basePath = $paths[0] ?? '~/projects';
+        $projectPath = rtrim((string) $basePath, '/').'/'.$projectSlug;
+
+        // Create project in database
+        $project = Project::create([
+            'environment_id' => $environment->id,
+            'name' => $validated['name'],
+            'display_name' => $validated['name'],
+            'slug' => $projectSlug,
+            'path' => $projectPath,
+            'php_version' => $validated['php_version'] ?? '8.4',
+            'github_repo' => $validated['template'] ?? null,
+            'has_public_folder' => false,
+            'status' => Project::STATUS_QUEUED,
+        ]);
+
+        // Dispatch job (async)
+        CreateProjectJob::dispatch($project->id, $projectOptions);
+
+        // API requests get JSON response
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Project creation queued',
+                'slug' => $projectSlug,
+                'project' => $project,
+            ]);
+        }
+
+        // Web requests get redirect with provisioning slug for WebSocket tracking
+        // Use /projects for single-environment mode, /environments/{id}/projects for multi-environment
+        $redirectUrl = config('orbit.multi_environment')
+            ? route('environments.projects', ['environment' => $environment->id])
+            : '/projects';
+
+        return redirect($redirectUrl)
+            ->with([
+                'provisioning' => $projectSlug,
+                'success' => "Project '{$validated['name']}' is being created...",
+            ]);
+    }
+
+    /**
+     * Create project via API for remote environment.
+     */
+    protected function storeRemote(Request $request, $environment, array $validated)
+    {
         $result = $this->connector->sendRequest(
             $environment,
             new CreateProjectRequest($validated)
@@ -74,11 +176,29 @@ class ProjectController extends Controller
         // Web requests get redirect with provisioning slug for WebSocket tracking
         $slug = $result['slug'] ?? $result['data']['slug'] ?? null;
 
-        return redirect()->route('environments.projects', ['environment' => $environment->id])
+        // Use /projects for single-environment mode, /environments/{id}/projects for multi-environment
+        $redirectUrl = config('orbit.multi_environment')
+            ? route('environments.projects', ['environment' => $environment->id])
+            : '/projects';
+
+        return redirect($redirectUrl)
             ->with([
                 'provisioning' => $slug,
                 'success' => "Project '{$validated['name']}' is being created...",
             ]);
+    }
+
+    /**
+     * Extract template name from repo URL.
+     */
+    protected function extractTemplateName(string $template): string
+    {
+        // Handle owner/repo format
+        if (preg_match('/([^\/]+)$/', $template, $matches)) {
+            return str_replace('.git', '', $matches[1]);
+        }
+
+        return $template;
     }
 
     /**

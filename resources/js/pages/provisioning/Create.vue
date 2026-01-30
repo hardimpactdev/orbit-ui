@@ -126,8 +126,8 @@ const checkServer = async () => {
 };
 
 const addWithoutProvisioning = () => {
-    // Create server directly without provisioning
-    router.post('/servers', {
+    // Create environment directly without provisioning
+    router.post('/environments', {
         name: form.name,
         host: form.host,
         user: checkResult.value?.connected_as === 'launchpad' ? 'launchpad' : form.user,
